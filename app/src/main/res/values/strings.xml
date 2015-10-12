@@ -9,4 +9,5 @@
     <string name="copyright">Copyright</string>
     <string name="title_activity_copyright_notice">Copyright Notice</string>
     <string name="copyright_notice">This app\'s code is licensed under the Unlicense (http://unlicense.org).\n\nThe app icon is from http://icons8.com.</string>
+    <string name="title_activity_maps">Map</string>
 </resources>

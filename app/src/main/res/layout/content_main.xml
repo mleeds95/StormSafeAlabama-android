@@ -28,5 +28,5 @@
         android:layout_height="wrap_content"
         android:text="@string/find_shelters_button"
         android:layout_margin="20dp"
-        android:id="@+id/button" />
+        android:id="@+id/find_shelters_button" />
 </LinearLayout>
