@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">Storm Safe Alabama</string>
     <string name="action_settings">Settings</string>
+    <string name="disclaimer">By using this app, you acknowledge that the information herein is provided on a best effort basis and is not guaranteed to be correct. You also agree not to hold liable either the app developer or The University of Alabama.</string>
+    <string name="developer_email">mwl458+SSA@gmail.com</string>
+    <string name="email_subject">Storm Safe Alabama app feedback</string>
+    <string name="contact">Use the email button below to email the app developer with shelter locations to be added or other feedback.</string>
+    <string name="find_shelters_button">Find Nearby Storm Shelters</string>
+    <string name="copyright">Copyright</string>
+    <string name="title_activity_copyright_notice">Copyright Notice</string>
+    <string name="copyright_notice">This app\'s code is licensed under the Unlicense (http://unlicense.org).\n\nThe app icon is from http://icons8.com.</string>
 </resources>
