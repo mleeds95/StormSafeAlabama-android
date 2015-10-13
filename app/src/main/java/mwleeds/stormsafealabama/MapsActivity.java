@@ -13,7 +13,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.games.GamesActivityResultCodes;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -25,6 +24,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.geojson.GeoJsonLayer;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 
 public class MapsActivity extends FragmentActivity
         implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks,
@@ -34,7 +39,9 @@ public class MapsActivity extends FragmentActivity
     private GoogleApiClient mLocationClient;
     private LocationListener mLocationListener;
     private LocationRequest mLocationRequest;
-    private boolean locationSettingsGood = false;
+    private boolean mLocationSettingsGood = false;
+
+    // constants
     public static final long GPS_LOCATION_INTERVAL = 5000;
     public static final long GPS_FASTEST_INTERVAL = 1000;
     public static final int MAP_ZOOM_LEVEL = 15;
@@ -73,6 +80,19 @@ public class MapsActivity extends FragmentActivity
         mLocationClient.connect();
 
         mMap.setMyLocationEnabled(true);
+
+        addRefugeLocationsToMap();
+    }
+
+    private void addRefugeLocationsToMap() {
+        try {
+            GeoJsonLayer layer = new GeoJsonLayer(mMap, R.raw.ua_bara_2014_08_18, getApplicationContext());
+            layer.addLayerToMap();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -104,7 +124,7 @@ public class MapsActivity extends FragmentActivity
                 final Status status = locationSettingsResult.getStatus();
                 switch(status.getStatusCode()) {
                     case LocationSettingsStatusCodes.SUCCESS:
-                        locationSettingsGood = true;
+                        mLocationSettingsGood = true;
                         // request regular location updates
                         LocationServices.FusedLocationApi.requestLocationUpdates(mLocationClient, mLocationRequest, mLocationListener);
                         break;
@@ -119,7 +139,7 @@ public class MapsActivity extends FragmentActivity
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                         // inform the user they have no means of finding their location
                         Toast.makeText(MapsActivity.this, R.string.bad_location_settings, Toast.LENGTH_SHORT).show();
-                        locationSettingsGood = false;
+                        mLocationSettingsGood = false;
                         break;
                 }
             }
@@ -133,14 +153,14 @@ public class MapsActivity extends FragmentActivity
             case REQUEST_CHECK_SETTINGS:
                 switch (resultCode) {
                     case Activity.RESULT_OK:
-                        locationSettingsGood = true;
+                        mLocationSettingsGood = true;
                         // request regular location updates
                         LocationServices.FusedLocationApi.requestLocationUpdates(mLocationClient, mLocationRequest, mLocationListener);
                         break;
                     case Activity.RESULT_CANCELED:
                         // inform the user they won't be able to get their location
                         Toast.makeText(MapsActivity.this, R.string.location_settings_unchanged, Toast.LENGTH_SHORT).show();
-                        locationSettingsGood = false;
+                        mLocationSettingsGood = false;
                         break;
                     default:
                         break;
