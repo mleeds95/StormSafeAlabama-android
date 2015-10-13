@@ -11,4 +11,6 @@
     <string name="app_copyright">This app is licensed under the Unlicense (http://unlicense.org).\n\n</string>
     <string name="icon_copyright">The app icon is from http://icons8.com.\n\n</string>
     <string name="title_activity_maps">Map</string>
+    <string name="get_location_failed">Error: Location update failed</string>
+    <string name="get_location_suspended">GPS Location Request Suspended</string>
 </resources>
