@@ -54,6 +54,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" />
         </activity>
+
+        <provider android:authorities="mwleeds.stormsafealabama.locationprovider"
+            android:name=".LocationProvider"
+            android:exported="false" />
     </application>
 
 </manifest>
