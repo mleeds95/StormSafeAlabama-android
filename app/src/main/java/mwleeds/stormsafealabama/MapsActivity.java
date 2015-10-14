@@ -114,7 +114,7 @@ public class MapsActivity extends FragmentActivity
             // add the building name and refuge area description from the GeoJSON properties
             // to the map marker's title and snippet attributes so the user can see them
             for (GeoJsonFeature feature : layer.getFeatures()) {
-                GeoJsonPointStyle pointStyle = layer.getDefaultPointStyle();
+                GeoJsonPointStyle pointStyle = new GeoJsonPointStyle();
                 pointStyle.setTitle(feature.getProperty("Building"));
                 pointStyle.setSnippet(feature.getProperty("Best Available Refuge Area"));
                 feature.setPointStyle(pointStyle);
