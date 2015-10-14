@@ -52,10 +52,20 @@ public class MapsActivity extends FragmentActivity
     private Context mContext;
 
     // constants
+    // how often to request location updates (low numbers hurt battery life)
     public static final long GPS_LOCATION_INTERVAL = 5000;
     public static final long GPS_FASTEST_INTERVAL = 1000;
+    // zoom level after a location change
     public static final int MAP_ZOOM_LEVEL = 15;
+    // constant used in the callback when the user changes location settings
     public static final int REQUEST_CHECK_SETTINGS = 100;
+    // coordinates of the map's initial position
+    public static final double ALABAMA_LAT = 32.8;
+    public static final double ALABAMA_LONG = -86.7;
+    // initial zoom level of the map
+    public static final float INITIAL_ZOOM = 6;
+    // number of meters of location change to trigger the map to move
+    public static final float LOCATION_CHANGE_DISTANCE = 20;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +93,8 @@ public class MapsActivity extends FragmentActivity
         mMap = googleMap;
 
         // move camera to Alabama
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(32.8, -86.7), 6));
+        LatLng initialLatLng = new LatLng(ALABAMA_LAT, ALABAMA_LONG);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initialLatLng, INITIAL_ZOOM));
 
         mLocationClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
@@ -184,11 +195,32 @@ public class MapsActivity extends FragmentActivity
 
         // implement the LocationListener interface to update the map for each change
         mLocationListener = new LocationListener() {
+            private Location lastLocation = null;
+
             @Override
             public void onLocationChanged(Location location) {
-                LatLng latlng = new LatLng(location.getLatitude(), location.getLongitude());
-                //TODO only move camera on first update or if user requests it
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, MAP_ZOOM_LEVEL));
+
+                /*Float deltaDistance  = (lastLocation == null) ? 0 : location.distanceTo(lastLocation);
+                String msg = String.format("New location: %f, %f. Accuracy: %f. Delta Distance: %f",
+                        location.getLatitude(), location.getLongitude(), location.getAccuracy(), deltaDistance);
+                Toast.makeText(mContext, msg, Toast.LENGTH_LONG).show();*/
+
+                // only move the map location if the user has moved significantly
+                if (lastLocation == null ||
+                        ((location.getAccuracy() <= lastLocation.getAccuracy()) &&
+                         (location.distanceTo(lastLocation) > LOCATION_CHANGE_DISTANCE))) {
+
+                    LatLng latlng = new LatLng(location.getLatitude(), location.getLongitude());
+
+                    // update the map view, only zooming if the user hasn't zoomed in or out
+                    if (mMap.getCameraPosition().zoom == INITIAL_ZOOM) {
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, MAP_ZOOM_LEVEL));
+                    } else {
+                        mMap.animateCamera(CameraUpdateFactory.newLatLng(latlng));
+                    }
+
+                    lastLocation = location;
+                }
             }
         };
 
