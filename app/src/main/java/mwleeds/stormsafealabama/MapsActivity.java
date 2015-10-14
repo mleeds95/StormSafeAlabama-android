@@ -1,12 +1,19 @@
 package mwleeds.stormsafealabama;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -25,6 +32,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.maps.android.geojson.GeoJsonFeature;
 import com.google.maps.android.geojson.GeoJsonLayer;
 import com.google.maps.android.geojson.GeoJsonPointStyle;
@@ -41,7 +49,7 @@ public class MapsActivity extends FragmentActivity
     private GoogleApiClient mLocationClient;
     private LocationListener mLocationListener;
     private LocationRequest mLocationRequest;
-    private boolean mLocationSettingsGood = false;
+    private Context mContext;
 
     // constants
     public static final long GPS_LOCATION_INTERVAL = 5000;
@@ -57,6 +65,7 @@ public class MapsActivity extends FragmentActivity
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        mContext = getApplicationContext();
     }
 
 
@@ -88,14 +97,43 @@ public class MapsActivity extends FragmentActivity
         // add a blue dot at the user's location
         mMap.setMyLocationEnabled(true);
 
+        // change the look of info windows to accommodate text that spans multiple lines
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker marker) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+                LinearLayout info = new LinearLayout(mContext);
+                info.setOrientation(LinearLayout.VERTICAL);
+
+                TextView title = new TextView(mContext);
+                title.setTextColor(Color.BLACK);
+                title.setGravity(Gravity.CENTER);
+                title.setTypeface(null, Typeface.BOLD);
+                title.setText(marker.getTitle());
+
+                TextView snippet = new TextView(mContext);
+                snippet.setTextColor(Color.GRAY);
+                snippet.setText(marker.getSnippet());
+
+                info.addView(title);
+                info.addView(snippet);
+
+                return info;
+            }
+        });
+
+        // add all the refuge location coordinates to the map
         addRefugeLocationsToMap();
     }
 
     private void addRefugeLocationsToMap() {
         try {
-
             // add the refuge area locations to the map from the res/raw folder
-            GeoJsonLayer layer = new GeoJsonLayer(mMap, R.raw.ua_bara_2014_08_18, getApplicationContext());
+            GeoJsonLayer layer = new GeoJsonLayer(mMap, R.raw.ua_bara_2014_08_18, mContext);
 
             // add title and snippet properties for the markers asynchronously
             AddMarkerProperties addMarkerProperties = new AddMarkerProperties();
@@ -103,7 +141,8 @@ public class MapsActivity extends FragmentActivity
 
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
-            }
+                Toast.makeText(this, R.string.load_geojson_failed, Toast.LENGTH_LONG).show();
+        }
     }
 
     private class AddMarkerProperties extends AsyncTask<GeoJsonLayer, Void, GeoJsonLayer> {
@@ -116,7 +155,19 @@ public class MapsActivity extends FragmentActivity
             for (GeoJsonFeature feature : layer.getFeatures()) {
                 GeoJsonPointStyle pointStyle = new GeoJsonPointStyle();
                 pointStyle.setTitle(feature.getProperty("Building"));
-                pointStyle.setSnippet(feature.getProperty("Best Available Refuge Area"));
+                String snippet = "";
+                if (feature.hasProperty("Floor")) {
+                    String floor = feature.getProperty("Floor");
+                    if (floor.length() != 0) {
+                        if (floor.equals("ALL")) {
+                            snippet += "All floors. ";
+                        } else {
+                            snippet += "Floor " + floor + ". ";
+                        }
+                    }
+                }
+                snippet += feature.getProperty("Best Available Refuge Area");
+                pointStyle.setSnippet(snippet);
                 feature.setPointStyle(pointStyle);
             }
             return layer;
@@ -136,6 +187,7 @@ public class MapsActivity extends FragmentActivity
             @Override
             public void onLocationChanged(Location location) {
                 LatLng latlng = new LatLng(location.getLatitude(), location.getLongitude());
+                //TODO only move camera on first update or if user requests it
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, MAP_ZOOM_LEVEL));
             }
         };
@@ -157,7 +209,6 @@ public class MapsActivity extends FragmentActivity
                 final Status status = locationSettingsResult.getStatus();
                 switch(status.getStatusCode()) {
                     case LocationSettingsStatusCodes.SUCCESS:
-                        mLocationSettingsGood = true;
                         // request regular location updates
                         LocationServices.FusedLocationApi.requestLocationUpdates(mLocationClient, mLocationRequest, mLocationListener);
                         break;
@@ -172,7 +223,6 @@ public class MapsActivity extends FragmentActivity
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                         // inform the user they have no means of finding their location
                         Toast.makeText(MapsActivity.this, R.string.bad_location_settings, Toast.LENGTH_SHORT).show();
-                        mLocationSettingsGood = false;
                         break;
                 }
             }
@@ -186,14 +236,12 @@ public class MapsActivity extends FragmentActivity
             case REQUEST_CHECK_SETTINGS:
                 switch (resultCode) {
                     case Activity.RESULT_OK:
-                        mLocationSettingsGood = true;
                         // request regular location updates
                         LocationServices.FusedLocationApi.requestLocationUpdates(mLocationClient, mLocationRequest, mLocationListener);
                         break;
                     case Activity.RESULT_CANCELED:
                         // inform the user they won't be able to get their location
                         Toast.makeText(MapsActivity.this, R.string.location_settings_unchanged, Toast.LENGTH_SHORT).show();
-                        mLocationSettingsGood = false;
                         break;
                     default:
                         break;

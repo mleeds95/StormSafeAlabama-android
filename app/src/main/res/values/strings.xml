@@ -16,4 +16,5 @@
     <string name="bad_location_settings">Error: Can\'t find current location</string>
     <string name="error_fix_location_settings">An error occurred when attempting to fix location settings</string>
     <string name="location_settings_unchanged">Location settings need attention</string>
+    <string name="load_geojson_failed">Error: couldn\'t load refuge locations onto map</string>
 </resources>
