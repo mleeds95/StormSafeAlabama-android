@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.widget.Toast;
@@ -24,10 +25,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.geojson.GeoJsonFeature;
 import com.google.maps.android.geojson.GeoJsonLayer;
+import com.google.maps.android.geojson.GeoJsonPointStyle;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -71,14 +73,19 @@ public class MapsActivity extends FragmentActivity
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        // move camera to Alabama
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(32.8, -86.7), 6));
+
         mLocationClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
 
+        // connect to Google Location Services
         mLocationClient.connect();
 
+        // add a blue dot at the user's location
         mMap.setMyLocationEnabled(true);
 
         addRefugeLocationsToMap();
@@ -86,12 +93,38 @@ public class MapsActivity extends FragmentActivity
 
     private void addRefugeLocationsToMap() {
         try {
+
+            // add the refuge area locations to the map from the res/raw folder
             GeoJsonLayer layer = new GeoJsonLayer(mMap, R.raw.ua_bara_2014_08_18, getApplicationContext());
+
+            // add title and snippet properties for the markers asynchronously
+            AddMarkerProperties addMarkerProperties = new AddMarkerProperties();
+            addMarkerProperties.execute(layer);
+
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+            }
+    }
+
+    private class AddMarkerProperties extends AsyncTask<GeoJsonLayer, Void, GeoJsonLayer> {
+
+        @Override
+        protected GeoJsonLayer doInBackground(GeoJsonLayer... params) {
+            GeoJsonLayer layer = params[0];
+            // add the building name and refuge area description from the GeoJSON properties
+            // to the map marker's title and snippet attributes so the user can see them
+            for (GeoJsonFeature feature : layer.getFeatures()) {
+                GeoJsonPointStyle pointStyle = layer.getDefaultPointStyle();
+                pointStyle.setTitle(feature.getProperty("Building"));
+                pointStyle.setSnippet(feature.getProperty("Best Available Refuge Area"));
+                feature.setPointStyle(pointStyle);
+            }
+            return layer;
+        }
+
+        @Override
+        protected void onPostExecute(GeoJsonLayer layer) {
             layer.addLayerToMap();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
     }
 
