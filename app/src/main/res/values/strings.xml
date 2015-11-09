@@ -17,4 +17,8 @@
     <string name="error_fix_location_settings">An error occurred when attempting to fix location settings</string>
     <string name="location_settings_unchanged">Location settings need attention</string>
     <string name="load_geojson_failed">Error: couldn\'t load refuge locations onto map</string>
+    <string name="check_for_updates">Check for Updated Data</string>
+    <string name="BARA_spreadsheet_URL"><![CDATA[https://docs.google.com/spreadsheets/d/1oj9es92HhOuaqaxeodfoUZZLPBBoYZGqpWNWdbF-TgY/export?format=csv&id=1oj9es92HhOuaqaxeodfoUZZLPBBoYZGqpWNWdbF-TgY&gid=1712180013]]></string>
+    <string name="download_error">An error occurred while downloading refuge locations.</string>
+    <string name="csv_filename">BARA_data.csv</string>
 </resources>

@@ -11,14 +11,19 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:showIn="@layout/activity_main"
     tools:context=".MainActivity"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:weightSum="1">
 
-    <TextView android:text="@string/disclaimer"
+    <TextView
+        android:id="@+id/disclaimer_text"
+        android:text="@string/disclaimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="20dp" />
 
-    <TextView android:text="@string/contact"
+    <TextView
+        android:id="@+id/contact_text"
+        android:text="@string/contact"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="20dp" />
@@ -29,4 +34,21 @@
         android:text="@string/find_shelters_button"
         android:layout_margin="20dp"
         android:id="@+id/find_shelters_button" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/check_for_updates"
+        android:id="@+id/check_for_updates_button"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="20dp" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:gravity="center"
+        android:visibility="invisible" />
+
 </LinearLayout>
