@@ -13,7 +13,6 @@ import android.widget.ProgressBar;
 
 public class MainActivity extends AppCompatActivity {
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,21 +37,13 @@ public class MainActivity extends AppCompatActivity {
         findSheltersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent mapsIntent = new Intent(MainActivity.this, MapsActivity.class);
-                startActivity(mapsIntent);
-            }
-        });
-
-        Button checkForUpdatesButton = (Button) findViewById(R.id.check_for_updates_button);
-        checkForUpdatesButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                // update the data first
                 ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
                 progressBar.setVisibility(View.VISIBLE);
                 Object[] params = {getString(R.string.BARA_spreadsheet_URL),
                                    getApplicationContext(),
                                    progressBar};
-                new DownloadFileTask().execute(params);
+                new UpdateDataTask().execute(params);
             }
         });
     }

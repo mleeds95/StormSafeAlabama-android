@@ -38,7 +38,9 @@ import com.google.maps.android.geojson.GeoJsonLayer;
 import com.google.maps.android.geojson.GeoJsonPointStyle;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 
 public class MapsActivity extends FragmentActivity
@@ -143,14 +145,23 @@ public class MapsActivity extends FragmentActivity
 
     private void addRefugeLocationsToMap() {
         try {
-            // add the refuge area locations to the map from the res/raw folder
-            GeoJsonLayer layer = new GeoJsonLayer(mMap, R.raw.ua_bara_2014_08_18, mContext);
+            // load the refuge location data from the file system
+            FileInputStream inputStream = openFileInput(getString(R.string.geojson_filename));
+            StringBuilder builder = new StringBuilder();
+            int ch;
+            while((ch = inputStream.read()) != -1){
+                builder.append((char)ch);
+            }
+            JSONObject geoJSON = new JSONObject(builder.toString());
+
+            // add the refuge area locations to the map
+            GeoJsonLayer layer = new GeoJsonLayer(mMap, geoJSON);
 
             // add title and snippet properties for the markers asynchronously
             AddMarkerProperties addMarkerProperties = new AddMarkerProperties();
             addMarkerProperties.execute(layer);
 
-            } catch (IOException | JSONException e) {
+        } catch (IOException | JSONException e) {
                 e.printStackTrace();
                 Toast.makeText(this, R.string.load_geojson_failed, Toast.LENGTH_LONG).show();
         }
