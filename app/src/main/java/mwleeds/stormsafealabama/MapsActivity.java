@@ -160,6 +160,7 @@ public class MapsActivity extends FragmentActivity
             // add title and snippet properties for the markers asynchronously
             AddMarkerProperties addMarkerProperties = new AddMarkerProperties();
             addMarkerProperties.execute(layer);
+            //TODO differentiate BARAs from FEMA shelters
 
         } catch (IOException | JSONException e) {
                 e.printStackTrace();
@@ -188,7 +189,7 @@ public class MapsActivity extends FragmentActivity
                         }
                     }
                 }
-                snippet += feature.getProperty("Best Available Refuge Area");
+                snippet += feature.getProperty("Description");
                 pointStyle.setSnippet(snippet);
                 feature.setPointStyle(pointStyle);
             }

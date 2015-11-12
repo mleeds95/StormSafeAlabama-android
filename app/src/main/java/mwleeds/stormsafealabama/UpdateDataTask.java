@@ -161,7 +161,7 @@ public class UpdateDataTask extends AsyncTask<Object, Void, Integer> {
         reader.readLine(); // ignore column names
         // iterate over the rows, converting them to Points
         while ((line = csvReader.readNext()) != null) {
-            if (line[3].length() < 3 || !line[3].contains(","))
+            if (line[4].length() < 3 || !line[4].contains(","))
                 continue;
 
             JSONObject feature = new JSONObject();
@@ -169,16 +169,17 @@ public class UpdateDataTask extends AsyncTask<Object, Void, Integer> {
 
             JSONObject point = new JSONObject();
             point.put("type", "Point");
-            String transposedCoords = line[3].split(",")[1] + ", " + line[3].split(",")[0];
+            String transposedCoords = line[4].split(",")[1] + ", " + line[4].split(",")[0];
             JSONArray coord = new JSONArray("[" + transposedCoords + "]");
             point.put("coordinates", coord);
             feature.put("geometry", point);
 
             JSONObject properties = new JSONObject();
             properties.put("Building", line[0]);
-            properties.put("Floor", line[1]);
-            properties.put("Best Available Refuge Area", line[2]);
-            properties.put("Formatted Address", line[4]);
+            properties.put("BARA?", line[1]);
+            properties.put("Floor", line[2]);
+            properties.put("Description", line[3]);
+            properties.put("Address", line[5]);
             feature.put("properties", properties);
 
             featureList.put(feature);
